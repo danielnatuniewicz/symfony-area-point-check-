@@ -1,0 +1,103 @@
+<head>
+    <title>area</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Maven+Pro&display=swap" rel="stylesheet">
+<link href="https://pysznykod.pl/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://pysznykod.pl/css/style.css" rel="stylesheet" />
+<script src="https://pysznykod.pl/js/jquery.min.js"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTMFeSJrQpnWDktpizazUANqhda0wK0sA&callback=initMap&v=weekly" defer></script>
+<style>
+            #map{
+                width:100%;
+                height:50%;
+            }
+        </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="main-box mg-rem">
+            <div class="main-header">
+                <h3>area</h3>
+            </div>
+            <div id="map"></div>
+            <div class="main-content mt-10">
+                <form id="check">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input class="wd-full pd-r-5 mg-mobile-b-10" name="lat" placeholder="Wprowadź latitude" />
+                        </div>
+                        <div class="col-md-6">
+                            <input class="wd-full pd-r-5 mg-mobile-b-10" name="lng" placeholder="Wprowadź longitude" />
+                        </div>
+                        <div class="col-md-12">
+                            <button type="submit" class="sign-btn mt-10">Sprawdź</button>
+                        </div>
+                    </div>
+                </form>
+                <div id="result"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTMFeSJrQpnWDktpizazUANqhda0wK0sA&callback=initMap&v=weekly" defer></script>
+    <script src="https://pysznykod.pl/js/jquery.min.js"></script>
+
+    <script>
+        $(document).ready(function(){
+            $("#check").submit(function(e){
+                e.preventDefault();
+
+                var form = $(this);
+
+                $.ajax({
+                    type: "POST",
+                    url: "/check",
+                    data: form.serialize(),
+
+                    success: function(data){
+                        if(data['status'] == "ok"){
+                            if(data['inside']){
+                                $('#result').html('<div class="success-message pd-0 mt-10 center" style="font-size:17px;">The point is inside the area</div>');
+                            } else {
+                                $('#result').html('<div class="error-message pd-0 mt-10 center" style="font-size:17px;">The point is outside the area</div>');
+                            }
+                        } else {
+                            $('#result').html('<div class="error-message pd-0 mt-10 center" style="font-size:17px;">No data entered</div>');
+                        }
+                    }
+                })
+            });
+        });
+
+        function initMap() {
+        const map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 12,
+            center: { lat: {{ area[0][0] }}, lng: {{ area[0][1] }} },
+            mapTypeId: "terrain",
+        });
+
+        const area = [
+            {% for area in area %}
+                { lat: {{ area[0] }}, lng: {{area[1]}} },
+            {% endfor %}
+        ];
+        const setArea = new google.maps.Polygon({
+            paths: area,
+            strokeColor: "#FF0000",
+            strokeOpacity: 0.8,
+            strokeWeight: 2,
+            fillColor: "#FF0000",
+            fillOpacity: 0.35,
+        });
+
+        setArea.setMap(map);
+        
+        }
+
+        window.initMap = initMap;    
+    </script>
+</body>

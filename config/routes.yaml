@@ -1,3 +1,10 @@
 controllers:
     resource: ../src/Controller/
     type: attribute
+index:
+    path: /
+    controller: App\Controller\IndexController::index
+check:
+    path: /check
+    controller: App\Controller\CheckController::check
+    methods: POST
